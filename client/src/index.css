@@ -284,3 +284,115 @@ select:focus {
   color: inherit;
   cursor: pointer;
 }
+
+/* Row controls */
+.read-toggle {
+  accent-color: var(--moss);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.rating-select {
+  padding: 3px 6px;
+  font-size: 0.85rem;
+  color: var(--plum);
+}
+
+.cell-actions .btn + .btn {
+  margin-left: 6px;
+}
+
+.btn-danger {
+  background: var(--bark);
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #523822;
+}
+
+tr.is-busy {
+  opacity: 0.5;
+}
+
+/* Statistics panel */
+.shelf-stats {
+  border-top-color: var(--moss);
+}
+
+.shelf-stats h2 {
+  color: var(--moss-dark);
+}
+
+.shelf-stats h3 {
+  margin: 16px 0 8px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bark);
+}
+
+.stat-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+
+.stat-tiles div {
+  background: var(--moss-soft);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.stat-tiles dt {
+  font-size: 0.75rem;
+  color: var(--moss-dark);
+}
+
+.stat-tiles dd {
+  margin: 2px 0 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--plum);
+}
+
+.genre-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.genre-bars li {
+  display: grid;
+  grid-template-columns: 90px 1fr 24px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.genre-bar {
+  height: 10px;
+  background: var(--bark-soft);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.genre-bar span {
+  display: block;
+  height: 100%;
+  background: var(--moss);
+}
+
+.genre-count {
+  text-align: right;
+  color: var(--bark);
+}
+
+.muted {
+  color: var(--bark);
+  margin: 0;
+}

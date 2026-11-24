@@ -1,5 +1,7 @@
+import ShelfRow from './ShelfRow.jsx';
+
 // Shows the list of books, or a loading / error / empty message instead.
-function ShelfTable({ books, status, error, onRetry, onEdit }) {
+function ShelfTable({ books, status, error, onRetry, onEdit, onPatch, onDelete }) {
   if (status === 'error') {
     return (
       <div className="state state-error" role="alert">
@@ -35,21 +37,13 @@ function ShelfTable({ books, status, error, onRetry, onEdit }) {
         </thead>
         <tbody>
           {books.map((book) => (
-            <tr key={book.id}>
-              <td className="cell-title">{book.title}</td>
-              <td>{book.author}</td>
-              <td>{book.year}</td>
-              <td>
-                <span className={`genre-tag genre-${book.genre}`}>{book.genre}</span>
-              </td>
-              <td>{book.read ? 'Yes' : 'No'}</td>
-              <td>{book.rating ?? '—'}</td>
-              <td className="cell-actions">
-                <button type="button" className="btn btn-small btn-ghost" onClick={() => onEdit(book.id)}>
-                  Edit
-                </button>
-              </td>
-            </tr>
+            <ShelfRow
+              key={book.id}
+              book={book}
+              onEdit={onEdit}
+              onPatch={onPatch}
+              onDelete={onDelete}
+            />
           ))}
         </tbody>
       </table>

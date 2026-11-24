@@ -1,7 +1,16 @@
 import { useEffect, useState } from 'react';
-import { addBook, getBook, getBooks, replaceBook } from './api/books.js';
+import {
+  addBook,
+  deleteBook,
+  getBook,
+  getBooks,
+  getStats,
+  replaceBook,
+  updateBook,
+} from './api/books.js';
 import BookEditor from './components/BookEditor.jsx';
 import FilterStrip from './components/FilterStrip.jsx';
+import ShelfStats from './components/ShelfStats.jsx';
 import ShelfTable from './components/ShelfTable.jsx';
 
 const START_FILTERS = { q: '', genre: '', read: '', sort: '', order: 'asc' };
@@ -14,6 +23,9 @@ function App() {
   const [listVersion, setListVersion] = useState(0);
   const [editingBook, setEditingBook] = useState(null);
   const [notice, setNotice] = useState('');
+  const [stats, setStats] = useState(null);
+  const [statsError, setStatsError] = useState('');
+  const [statsVersion, setStatsVersion] = useState(0);
 
   // Ask the server for a new list whenever a filter changes.
   useEffect(() => {
@@ -43,11 +55,36 @@ function App() {
     };
   }, [filters, listVersion]);
 
+  // Statistics come from the server and are fetched again after every change.
+  useEffect(() => {
+    const controller = new AbortController();
+
+    getStats(controller.signal)
+      .then((data) => {
+        setStats(data);
+        setStatsError('');
+      })
+      .catch((err) => {
+        if (err.name !== 'AbortError') {
+          setStatsError(err.message);
+        }
+      });
+
+    return () => controller.abort();
+  }, [statsVersion]);
+
   const changeFilter = (name, value) => {
     setFilters((previous) => ({ ...previous, [name]: value }));
   };
 
   const reloadList = () => setListVersion((version) => version + 1);
+
+  // After the server confirms a change: refresh the list (filters may now
+  // exclude or reorder the book) and the statistics.
+  const afterChange = () => {
+    reloadList();
+    setStatsVersion((version) => version + 1);
+  };
 
   // Fetch the latest copy of the book from the server before editing it.
   const startEditing = async (id) => {
@@ -69,7 +106,33 @@ function App() {
       const created = await addBook(payload);
       setBooks((previous) => [...previous, created]);
     }
-    reloadList();
+    afterChange();
+  };
+
+  // Toggle read / set rating (PATCH sends only the changed fields).
+  const patchBook = async (id, changes) => {
+    setNotice('');
+    try {
+      const saved = await updateBook(id, changes);
+      setBooks((previous) => previous.map((book) => (book.id === saved.id ? saved : book)));
+      afterChange();
+    } catch (err) {
+      setNotice(err.message);
+    }
+  };
+
+  const removeBook = async (id) => {
+    setNotice('');
+    try {
+      await deleteBook(id);
+      setBooks((previous) => previous.filter((book) => book.id !== id));
+      if (editingBook?.id === id) {
+        setEditingBook(null);
+      }
+      afterChange();
+    } catch (err) {
+      setNotice(err.message);
+    }
   };
 
   return (
@@ -86,6 +149,7 @@ function App() {
           onSave={saveBook}
           onCancel={() => setEditingBook(null)}
         />
+        <ShelfStats stats={stats} error={statsError} />
       </div>
 
       {notice && (
@@ -109,6 +173,8 @@ function App() {
         error={listError}
         onRetry={reloadList}
         onEdit={startEditing}
+        onPatch={patchBook}
+        onDelete={removeBook}
       />
     </main>
   );
