@@ -183,6 +183,33 @@ app.delete('/api/books/:id', async (req, res) => {
   res.status(204).end();
 });
 
+// Statistics, computed from the current books on every request (never stored)
+app.get('/api/stats', async (req, res) => {
+  const books = await getAllBooks();
+
+  const readCount = books.filter((book) => book.read).length;
+
+  const ratings = books.filter((book) => book.rating !== null).map((book) => book.rating);
+  const averageRating =
+    ratings.length === 0
+      ? null
+      : Math.round((ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length) * 10) / 10;
+
+  // Only genres that have at least one book appear in the result
+  const byGenre = books.reduce(
+    (counts, book) => ({ ...counts, [book.genre]: (counts[book.genre] ?? 0) + 1 }),
+    {}
+  );
+
+  res.status(200).json({
+    total: books.length,
+    read: readCount,
+    unread: books.length - readCount,
+    averageRating,
+    byGenre,
+  });
+});
+
 app.listen(PORT, (error) => {
   if (error) {
     console.error('Could not start server:', error.message);
