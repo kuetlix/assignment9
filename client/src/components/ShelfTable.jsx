@@ -1,5 +1,5 @@
 // Shows the list of books, or a loading / error / empty message instead.
-function ShelfTable({ books, status, error, onRetry }) {
+function ShelfTable({ books, status, error, onRetry, onEdit }) {
   if (status === 'error') {
     return (
       <div className="state state-error" role="alert">
@@ -30,6 +30,7 @@ function ShelfTable({ books, status, error, onRetry }) {
             <th>Genre</th>
             <th>Read</th>
             <th>Rating</th>
+            <th aria-label="Actions"></th>
           </tr>
         </thead>
         <tbody>
@@ -43,6 +44,11 @@ function ShelfTable({ books, status, error, onRetry }) {
               </td>
               <td>{book.read ? 'Yes' : 'No'}</td>
               <td>{book.rating ?? '—'}</td>
+              <td className="cell-actions">
+                <button type="button" className="btn btn-small btn-ghost" onClick={() => onEdit(book.id)}>
+                  Edit
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
