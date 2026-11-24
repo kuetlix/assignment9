@@ -32,3 +32,156 @@ h1 {
   color: var(--plum);
   margin: 0 0 4px;
 }
+
+.masthead {
+  border-bottom: 3px solid var(--bark);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.masthead p {
+  margin: 0;
+  color: var(--bark);
+}
+
+/* Form controls */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--bark);
+}
+
+.field-grow {
+  flex: 1 1 200px;
+}
+
+input,
+select {
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 6px 8px;
+  border: 1px solid #cdbba6;
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid var(--plum);
+  outline-offset: 1px;
+}
+
+/* Buttons */
+.btn {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--moss);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--moss-dark);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--bark);
+  color: var(--bark);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bark-soft);
+}
+
+/* Filter strip */
+.filter-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  background: var(--plum-soft);
+  border-radius: 10px;
+}
+
+/* Table */
+.table-wrap {
+  overflow-x: auto;
+  transition: opacity 0.15s;
+}
+
+.table-wrap.is-refreshing {
+  opacity: 0.6;
+}
+
+.shelf-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e4d8c9;
+}
+
+.shelf-table th {
+  text-align: left;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: var(--bark);
+  padding: 10px;
+}
+
+.shelf-table td {
+  padding: 8px 10px;
+  border-top: 1px solid #eee3d6;
+  vertical-align: middle;
+}
+
+.shelf-table tbody tr:hover {
+  background: var(--paper);
+}
+
+.cell-title {
+  font-weight: 600;
+  color: var(--plum);
+}
+
+.genre-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: var(--moss-soft);
+  color: var(--moss-dark);
+}
+
+/* Loading, error and empty states */
+.state {
+  padding: 24px;
+  text-align: center;
+  background: #fff;
+  border: 1px dashed #cdbba6;
+  border-radius: 10px;
+  color: var(--bark);
+}
+
+.state-error {
+  border-color: #b5523b;
+  color: #8a3420;
+}
