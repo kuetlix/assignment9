@@ -1,6 +1,12 @@
 import express from 'express';
 import cors from 'cors';
-import { getAllBooks, getBookById, createBook, findDuplicate } from './booksStore.js';
+import {
+  getAllBooks,
+  getBookById,
+  createBook,
+  replaceBook,
+  findDuplicate,
+} from './booksStore.js';
 import { parseId, parseListQuery, validateBook } from './validate.js';
 
 const PORT = process.env.PORT || 3000;
@@ -89,6 +95,75 @@ app.post('/api/books', async (req, res) => {
   }
   const book = await createBook(data);
   res.status(201).location(`/api/books/${book.id}`).json(book);
+});
+// Replace a book with a complete body
+app.put('/api/books/:id', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: 'Book id must be a positive integer' });
+  }
+
+  const existing = await getBookById(id);
+  if (!existing) {
+    return res.status(404).json({ error: `Book with id ${id} was not found` });
+  }
+
+  const result = validateBook(req.body);
+  if (result.error) {
+    return res.status(400).json({ error: result.error });
+  }
+  const data = result.value;
+
+  const duplicate = await findDuplicate(data.title, data.author, id);
+  if (duplicate) {
+    return res.status(409).json({
+      error: `A book with title "${data.title}" by "${data.author}" already exists (id ${duplicate.id})`,
+    });
+  }
+
+  const book = await replaceBook(id, data);
+  res.status(200).json(book);
+});
+
+// Fields a client is allowed to change. Anything else (including "id") is ignored.
+const BOOK_FIELDS = ['title', 'author', 'year', 'genre', 'read', 'rating'];
+
+// Change only the fields that were sent
+app.patch('/api/books/:id', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: 'Book id must be a positive integer' });
+  }
+  const existing = await getBookById(id);
+  if (!existing) {
+    return res.status(404).json({ error: `Book with id ${id} was not found` });
+  }
+  const body = req.body;
+  if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+    return res.status(400).json({ error: 'Request body must be a JSON object' });
+  }
+  // Keep only known fields, then merge them over the existing book (new object)
+  const changes = Object.fromEntries(
+    BOOK_FIELDS.filter((field) => body[field] !== undefined).map((field) => [field, body[field]])
+  );
+  const merged = { ...existing, ...changes };
+
+  // The merged book must pass the same validation as a complete book
+  const result = validateBook(merged);
+  if (result.error) {
+    return res.status(400).json({ error: result.error });
+  }
+  const data = result.value;
+  
+  const duplicate = await findDuplicate(data.title, data.author, id);
+  if (duplicate) {
+    return res.status(409).json({
+      error: `A book with title "${data.title}" by "${data.author}" already exists (id ${duplicate.id})`,
+    });
+  }
+
+  const book = await replaceBook(id, data);
+  res.status(200).json(book);
 });
 
 app.listen(PORT, (error) => {
