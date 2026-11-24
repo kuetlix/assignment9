@@ -5,6 +5,7 @@ import {
   getBookById,
   createBook,
   replaceBook,
+  removeBook,
   findDuplicate,
 } from './booksStore.js';
 import { parseId, parseListQuery, validateBook } from './validate.js';
@@ -164,6 +165,22 @@ app.patch('/api/books/:id', async (req, res) => {
 
   const book = await replaceBook(id, data);
   res.status(200).json(book);
+});
+
+// Delete a book: 204 with no body, or 404 if it does not exist
+app.delete('/api/books/:id', async (req, res) => {
+  const id = parseId(req.params.id);
+  if (id === null) {
+    return res.status(400).json({ error: 'Book id must be a positive integer' });
+  }
+
+  const removed = await removeBook(id);
+  if (!removed) {
+    return res.status(404).json({ error: `Book with id ${id} was not found` });
+  }
+
+  // 204 No Content must not have a body, so end() instead of json()
+  res.status(204).end();
 });
 
 app.listen(PORT, (error) => {
