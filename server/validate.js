@@ -69,3 +69,67 @@ export function validateBook(body) {
     },
   };
 }
+const SORT_FIELDS = ['title', 'author', 'year', 'rating'];
+const QUERY_KEYS = ['genre', 'read', 'q', 'sort', 'order', 'limit', 'page'];
+
+// Returns { value } with clean options, or { error }.
+export function parseListQuery(query) {
+  // A repeated parameter (?genre=a&genre=b) arrives as an array -> 400
+  for (const key of QUERY_KEYS) {
+    if (Array.isArray(query[key])) {
+      return { error: `Query parameter "${key}" must not be repeated` };
+    }
+  }
+  const options = {
+    genre: null,
+    read: null,
+    q: null,
+    sort: null,
+    order: 'asc',
+    limit: 50,
+    page: 1,
+  };
+  if (query.genre !== undefined) {
+    if (!GENRES.includes(query.genre)) {
+      return { error: `"genre" must be one of: ${GENRES.join(', ')}` };
+    }
+    options.genre = query.genre;
+  }
+  if (query.read !== undefined) {
+    if (query.read !== 'true' && query.read !== 'false') {
+      return { error: '"read" must be "true" or "false"' };
+    }
+    options.read = query.read === 'true';
+  }
+  if (query.q !== undefined) {
+    const q = query.q.trim().toLowerCase();
+    options.q = q === '' ? null : q;
+  }
+  if (query.sort !== undefined) {
+    if (!SORT_FIELDS.includes(query.sort)) {
+      return { error: `"sort" must be one of: ${SORT_FIELDS.join(', ')}` };
+    }
+    options.sort = query.sort;
+  }
+  if (query.order !== undefined) {
+    if (query.order !== 'asc' && query.order !== 'desc') {
+      return { error: '"order" must be "asc" or "desc"' };
+    }
+    options.order = query.order;
+  }
+  if (query.limit !== undefined) {
+    const limit = /^\d+$/.test(query.limit) ? Number(query.limit) : NaN;
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+      return { error: '"limit" must be an integer between 1 and 50' };
+    }
+    options.limit = limit;
+  }
+  if (query.page !== undefined) {
+    const page = /^\d+$/.test(query.page) ? Number(query.page) : NaN;
+    if (!Number.isInteger(page) || page < 1) {
+      return { error: '"page" must be an integer of 1 or more' };
+    }
+    options.page = page;
+  }
+  return { value: options };
+}
