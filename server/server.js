@@ -210,6 +210,35 @@ app.get('/api/stats', async (req, res) => {
   });
 });
 
+// Test route: throws inside an async handler on purpose (documented in README).
+// Express 5 passes the rejected promise to the error-handling middleware below.
+app.get('/api/crash', async (req, res) => {
+  await getAllBooks();
+  throw new Error('Deliberate crash to test the error handler');
+});
+
+// Any /api request that matched no route above
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
+// Error-handling middleware: four parameters, registered after all routes
+app.use((err, req, res, next) => {
+  // express.json() could not parse the request body
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ error: `Malformed JSON in request body: ${err.message}` });
+  }
+
+  console.error('Unhandled error:', err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  // No stack trace is sent to the client
+  res.status(500).json({ error: 'Something went wrong' });
+});
+
 app.listen(PORT, (error) => {
   if (error) {
     console.error('Could not start server:', error.message);
